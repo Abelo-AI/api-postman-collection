@@ -3,11 +3,13 @@
 [![Official Rakuten Viber Partner](https://img.shields.io/badge/Rakuten%20Viber-Official%20Messaging%20Partner-7360F2?style=flat&logo=viber&logoColor=white)](https://www.forbusiness.viber.com/en/messaging-partners/partner/abelo/)
 [![OpenAPI 3.1](https://img.shields.io/badge/OpenAPI-3.1-6BA539?style=flat&logo=openapi-initiative&logoColor=white)](./openapi_v1.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/import?collection_url=https://raw.githubusercontent.com/abelo-ai/abelo-api-postman-collection/main/postman/Abelo_API.postman_collection.json)
+[![Run in Postman](https://img.shields.io/badge/Postman-Run%20in%20Postman-FF6C37?style=flat&logo=postman&logoColor=white)](https://www.postman.com/abelo-ai/abelo-public-api)
 
 The official Postman collection, OpenAPI 3.1 specification, and quickstart guides for the **[Abelo](https://abelo.ai)** REST API.
 
 **Abelo** is an intelligent business messaging platform and an **Official Rakuten Viber Messaging Partner**. Businesses use Abelo to deliver transactional alerts (OTPs, order tracking, shipping notices), promotional campaigns, and eCommerce automations across **Viber**, **WhatsApp**, and **SMS** with automatic failover, profile synchronization, and 100% verified ROI tracking.
+
+Explore our collection directly in the [Official Postman Public Workspace](https://www.postman.com/abelo-ai/abelo-public-api).
 
 ---
 
@@ -25,14 +27,21 @@ The official Postman collection, OpenAPI 3.1 specification, and quickstart guide
 
 ## Quickstart with Postman
 
-### 1. Import Collection and Environment
-1. Clone this repository or download the files in [`postman/`](./postman/):
+You can get started either by opening the official Postman public workspace or by importing the collection files manually.
+
+### Option A: Open in Postman Public Workspace (Recommended)
+1. Navigate to the **[Abelo Public API Workspace](https://www.postman.com/abelo-ai/abelo-public-api)** on Postman.
+2. Select the **Abelo REST API** collection and click **Fork** to add it to your own Postman workspace.
+3. Select the **Abelo API (Production)** environment.
+
+### Option B: Manual File Import
+1. Clone this repository or download the files from [`postman/`](./postman/):
    - [`postman/Abelo_API.postman_collection.json`](./postman/Abelo_API.postman_collection.json)
    - [`postman/Abelo_Environment.postman_environment.json`](./postman/Abelo_Environment.postman_environment.json)
 2. Open Postman and click **Import** to load both files.
 3. Select the **Abelo API (Production)** environment.
 
-### 2. Configure Your Credentials
+### Configure Your Credentials
 In your Postman Environment, fill in your credentials obtained from the [Abelo Management Console](https://abelo.ai):
 - `baseUrl`: `https://api.abelo.ai/v1`
 - `authMethod`: `bearer` (default) or `hmac`
@@ -157,6 +166,7 @@ You can import this file directly into Swagger UI, Redoc, Postman, Insomnia, or 
 
 - **Website**: [https://abelo.ai](https://abelo.ai)
 - **Developer Documentation**: [https://docs.abelo.ai](https://docs.abelo.ai)
+- **Postman Public Workspace**: [https://www.postman.com/abelo-ai/abelo-public-api](https://www.postman.com/abelo-ai/abelo-public-api)
 - **Official Rakuten Viber Partner Directory**: [Abelo Partner Listing](https://www.forbusiness.viber.com/en/messaging-partners/partner/abelo/)
 - **Parent Company**: [TREBBBLE S.A.](https://www.trebbble.co)
 
