@@ -1,0 +1,627 @@
+{
+  "info": {
+    "_postman_id": "abelo-api-collection",
+    "name": "Abelo API",
+    "description": "Official Postman Collection for the Abelo REST API v1 — Official Rakuten Viber Messaging Partner, SMS, WhatsApp & Marketing Automation.\n\n### Authentication\nThis collection automatically handles both:\n1. **Basic Bearer Token** (`Authorization: Bearer <key_id>:<key_secret>`)\n2. **Enterprise HMAC-SHA256 Request Signing** (`X-Abelo-Key-Id`, `X-Abelo-Timestamp`, `X-Abelo-Signature`)\n\nSwitch between them by setting the `authMethod` environment variable to `bearer` or `hmac`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Abelo API Dual-Authentication Handler",
+          "// Supports both Basic Bearer Token and Enterprise HMAC-SHA256 Request Signing",
+          "",
+          "function setHeader(name, value) {",
+          "    if (pm.request.headers.upsert) {",
+          "        pm.request.headers.upsert({ key: name, value: value });",
+          "    } else {",
+          "        pm.request.headers.remove(name);",
+          "        pm.request.headers.add({ key: name, value: value });",
+          "    }",
+          "}",
+          "",
+          "function removeHeader(name) {",
+          "    pm.request.headers.remove(name);",
+          "}",
+          "",
+          "const authMethod = (pm.environment.get(\"authMethod\") || \"bearer\").toLowerCase();",
+          "const keyId = pm.environment.get(\"apiKeyId\");",
+          "",
+          "if (authMethod === \"hmac\") {",
+          "    const hmacSecret = pm.environment.get(\"hmacSecret\");",
+          "    if (!keyId || !hmacSecret || keyId === \"YOUR_API_KEY_ID\" || hmacSecret === \"YOUR_HMAC_SECRET\") {",
+          "        console.warn(\"[Abelo Auth] 'hmac' mode requires 'apiKeyId' and 'hmacSecret' environment variables.\");",
+          "    }",
+          "",
+          "    const timestamp = Math.floor(Date.now() / 1000).toString();",
+          "    const method = pm.request.method.toUpperCase();",
+          "    ",
+          "    // Resolve full path (including /v1) after variable replacement",
+          "    let path = \"\";",
+          "    try {",
+          "        const resolvedUrl = pm.variables.replaceIn(pm.request.url.toString());",
+          "        // Handle protocol relative or absolute URLs",
+          "        const match = resolvedUrl.match(/^https?:\\/\\/[^\\/]+(\\/[^?#]*)/);",
+          "        if (match && match[1]) {",
+          "            path = match[1];",
+          "        } else {",
+          "            path = pm.request.url.getPath();",
+          "            if (typeof path === \"string\" && !path.startsWith(\"/\")) path = \"/\" + path;",
+          "        }",
+          "    } catch (e) {",
+          "        path = pm.request.url.getPath();",
+          "        if (typeof path === \"string\" && !path.startsWith(\"/\")) path = \"/\" + path;",
+          "    }",
+          "    ",
+          "    // Compute SHA256 hex digest of the raw request body with variables resolved",
+          "    const rawBody = pm.request.body && pm.request.body.raw ? pm.variables.replaceIn(pm.request.body.raw) : \"\";",
+          "    const cryptoLib = (typeof require === \"function\") ? (function() { try { return require(\"crypto-js\"); } catch(e) { return CryptoJS; } })() : CryptoJS;",
+          "    const bodyHash = cryptoLib.SHA256(rawBody).toString(cryptoLib.enc.Hex);",
+          "    ",
+          "    // Canonical string-to-sign: \"{timestamp}\\n{METHOD}\\n{path}\\n{body_hash}\"",
+          "    const stringToSign = `${timestamp}\\n${method}\\n${path}\\n${bodyHash}`;",
+          "    const signature = cryptoLib.HmacSHA256(stringToSign, hmacSecret || \"\").toString(CryptoJS.enc.Hex);",
+          "    ",
+          "    // Set Abelo HMAC headers",
+          "    setHeader(\"X-Abelo-Key-Id\", keyId || \"\");",
+          "    setHeader(\"X-Abelo-Timestamp\", timestamp);",
+          "    setHeader(\"X-Abelo-Signature\", signature);",
+          "    removeHeader(\"Authorization\");",
+          "",
+          "} else {",
+          "    // Basic Bearer Token mode: Authorization: Bearer <key_id>:<key_secret>",
+          "    const keySecret = pm.environment.get(\"apiKeySecret\");",
+          "    if (!keyId || !keySecret || keyId === \"YOUR_API_KEY_ID\" || keySecret === \"YOUR_API_KEY_SECRET\") {",
+          "        console.warn(\"[Abelo Auth] 'bearer' mode requires 'apiKeyId' and 'apiKeySecret' environment variables.\");",
+          "    }",
+          "",
+          "    setHeader(\"Authorization\", `Bearer ${keyId || \"\"}:${keySecret || \"\"}`);",
+          "    removeHeader(\"X-Abelo-Key-Id\");",
+          "    removeHeader(\"X-Abelo-Timestamp\");",
+          "    removeHeader(\"X-Abelo-Signature\");",
+          "}",
+          ""
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Messages",
+      "description": "Trigger automated and transactional messages across Viber, WhatsApp, and SMS with fallback.",
+      "item": [
+        {
+          "name": "Send Viber Message (Phone Number)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaign_id\": \"{{campaignId}}\",\n  \"recipient\": {\n    \"type\": \"phone_number\",\n    \"value\": \"{{testPhoneNumber}}\"\n  },\n  \"params\": {\n    \"first_name\": \"Alex\",\n    \"order_number\": \"ORD-94812\",\n    \"tracking_code\": \"ORD-94812\",\n    \"cta_label\": \"Track Order\"\n  },\n  \"client_reference\": \"internal-order-94812\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messages/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messages",
+                "send"
+              ]
+            },
+            "description": "Send a targeted Viber Business message (or automated SMS failover) by phone number."
+          }
+        },
+        {
+          "name": "Send Message (Email Lookup)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaign_id\": \"{{campaignId}}\",\n  \"recipient\": {\n    \"type\": \"email\",\n    \"value\": \"customer@example.com\"\n  },\n  \"params\": {\n    \"first_name\": \"Maria\",\n    \"discount_code\": \"WELCOME15\"\n  },\n  \"client_reference\": \"promo-welcome-15\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messages/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messages",
+                "send"
+              ]
+            },
+            "description": "Resolves recipient profile by email and dispatches the message to their verified channel."
+          }
+        },
+        {
+          "name": "Send Message (Public ID Lookup)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaign_id\": \"{{campaignId}}\",\n  \"recipient\": {\n    \"type\": \"public_id\",\n    \"value\": \"{{testProfileId}}\"\n  },\n  \"params\": {\n    \"first_name\": \"Alex\",\n    \"order_number\": \"ORD-94812\",\n    \"tracking_code\": \"ORD-94812\",\n    \"cta_label\": \"Track Order\"\n  },\n  \"client_reference\": \"internal-order-94812\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messages/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messages",
+                "send"
+              ]
+            },
+            "description": "Resolves recipient profile by public identifier and dispatches the message to their verified channel."
+          }
+        },
+        {
+          "name": "Send Message with Custom Webhook URL",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaign_id\": \"{{campaignId}}\",\n  \"recipient\": {\n    \"type\": \"phone_number\",\n    \"value\": \"{{testPhoneNumber}}\"\n  },\n  \"params\": {\n    \"otp_code\": \"849201\"\n  },\n  \"client_reference\": \"auth-req-5521\",\n  \"webhook_url\": \"https://api.yourdomain.com/v1/callbacks/viber-dlr\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messages/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messages",
+                "send"
+              ]
+            },
+            "description": "Dispatches a message with a custom callback URL that receives HMAC-signed lifecycle delivery events."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profiles",
+      "description": "Manage customer profiles, contact attributes, and messaging channel consent.",
+      "item": [
+        {
+          "name": "Create Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"{{testPhoneNumber}}\",\n  \"email\": \"customer@example.com\",\n  \"first_name\": \"Eleni\",\n  \"last_name\": \"Papadopoulou\",\n  \"viber_marketing_consent\": true,\n  \"sms_marketing_consent\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/profiles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profiles"
+              ]
+            },
+            "description": "Creates a new customer profile and channel consent settings."
+          }
+        },
+        {
+          "name": "List Profiles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/profiles?limit=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profiles"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Maximum number of profiles to return"
+                },
+                {
+                  "key": "phone_number",
+                  "value": "{{testPhoneNumber}}",
+                  "description": "Filter by exact phone number (mutually exclusive with email)",
+                  "disabled": true
+                },
+                {
+                  "key": "email",
+                  "value": "customer@example.com",
+                  "description": "Filter by email address (mutually exclusive with phone_number)",
+                  "disabled": true
+                },
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "description": "Pagination cursor",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lists profiles with optional filtering and pagination."
+          }
+        },
+        {
+          "name": "Get Profile by Public ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/profiles/:public_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profiles",
+                ":public_id"
+              ],
+              "variable": [
+                {
+                  "key": "public_id",
+                  "value": "{{testProfileId}}",
+                  "description": "Profile public ID"
+                }
+              ]
+            },
+            "description": "Retrieves profile details and messaging channel consent status."
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Elena\",\n  \"viber_marketing_consent\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/profiles/:public_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profiles",
+                ":public_id"
+              ],
+              "variable": [
+                {
+                  "key": "public_id",
+                  "value": "{{testProfileId}}",
+                  "description": "Profile public ID"
+                }
+              ]
+            },
+            "description": "Updates customer profile attributes or channel consent. Note: phone_number, viber_marketing_consent, and sms_marketing_consent cannot be explicitly cleared (set to null)."
+          }
+        },
+        {
+          "name": "Delete Profile",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/profiles/:public_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profiles",
+                ":public_id"
+              ],
+              "variable": [
+                {
+                  "key": "public_id",
+                  "value": "{{testProfileId}}",
+                  "description": "Profile public ID"
+                }
+              ]
+            },
+            "description": "Deletes a customer profile and associated identifiers."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "description": "Subscribe to real-time message delivery receipts (DLRs) and channel events.",
+      "item": [
+        {
+          "name": "Create Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Delivery Receipts\",\n  \"url\": \"https://api.yourdomain.com/webhooks/abelo\",\n  \"topics\": [\n    \"message.sent\",\n    \"message.delivered\",\n    \"message.seen\",\n    \"message.failed\",\n    \"message.expired\",\n    \"message.clicked\"\n  ],\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks"
+              ]
+            },
+            "description": "Registers an organization-level webhook endpoint subscribing to delivery events. Returns signing_secret exactly once — store it securely.\n\nGlobal Webhook Rules:\n* Limit: Maximum 5 active webhooks per organization.\n* Topic Overlap: Active webhooks cannot subscribe to overlapping topics.\n* Inactive Webhooks: Exempt from topic overlap validation until activated."
+          }
+        },
+        {
+          "name": "List Webhooks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/webhooks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks"
+              ]
+            },
+            "description": "Lists all registered webhooks for the authenticated organization."
+          }
+        },
+        {
+          "name": "Get Webhook Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/:webhook_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                ":webhook_id"
+              ],
+              "variable": [
+                {
+                  "key": "webhook_id",
+                  "value": "{{testWebhookId}}",
+                  "description": "Webhook ID"
+                }
+              ]
+            },
+            "description": "Retrieves configuration for a specific webhook."
+          }
+        },
+        {
+          "name": "Update Webhook",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Delivery Receipts\",\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/:webhook_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                ":webhook_id"
+              ],
+              "variable": [
+                {
+                  "key": "webhook_id",
+                  "value": "{{testWebhookId}}",
+                  "description": "Webhook ID"
+                }
+              ]
+            },
+            "description": "Updates an existing webhook configuration."
+          }
+        },
+        {
+          "name": "Delete Webhook",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/:webhook_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                ":webhook_id"
+              ],
+              "variable": [
+                {
+                  "key": "webhook_id",
+                  "value": "{{testWebhookId}}",
+                  "description": "Webhook ID"
+                }
+              ]
+            },
+            "description": "Permanently deletes a registered webhook configuration."
+          }
+        },
+        {
+          "name": "Rotate Webhook Secret",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/:webhook_id/rotate-secret",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                ":webhook_id",
+                "rotate-secret"
+              ],
+              "variable": [
+                {
+                  "key": "webhook_id",
+                  "value": "{{testWebhookId}}",
+                  "description": "Webhook ID"
+                }
+              ]
+            },
+            "description": "Rotates the HMAC signing secret used for webhook event delivery."
+          }
+        },
+        {
+          "name": "Test Webhook (Custom URL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://api.yourdomain.com/webhooks/abelo\",\n  \"body\": {\n    \"event\": \"test_event\",\n    \"message\": \"Testing webhook delivery endpoint\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                "test"
+              ]
+            },
+            "description": "Sends a mock test payload signed with API key webhook signing secret to verify a standalone endpoint."
+          }
+        },
+        {
+          "name": "Test Webhook by ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"webhook_id\": \"{{testWebhookId}}\",\n  \"body\": {\n    \"event\": \"test_event\",\n    \"message\": \"Testing webhook delivery endpoint\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                "test"
+              ]
+            },
+            "description": "Dispatches a mock test payload to the URL of an existing webhook configuration, signed with that webhook's own signing secret."
+          }
+        }
+      ]
+    },
+    {
+      "name": "System",
+      "description": "Service health and diagnostics.",
+      "item": [
+        {
+          "name": "Healthcheck (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/healthcheck",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "healthcheck"
+              ]
+            },
+            "description": "Returns operational status and authenticated caller identity."
+          }
+        },
+        {
+          "name": "Healthcheck (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": \"ping\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/healthcheck",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "healthcheck"
+              ]
+            },
+            "description": "Echoes back the posted value and authenticated caller identity."
+          }
+        }
+      ]
+    }
+  ]
+}
