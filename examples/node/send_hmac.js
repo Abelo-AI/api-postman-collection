@@ -1,4 +1,4 @@
-// Send a Viber message using Abelo API with Enterprise HMAC-SHA256 request signing
+// Send a message (Viber or SMS) using Abelo API with Enterprise HMAC-SHA256 request signing
 // Requires Node.js 18+ (native fetch support)
 const crypto = require("crypto");
 

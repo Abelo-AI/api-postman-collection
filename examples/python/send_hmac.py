@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Send a Viber message using Abelo API with Enterprise HMAC-SHA256 request signing.
+Send a message (Viber or SMS) using Abelo API with Enterprise HMAC-SHA256 request signing.
 
 Prerequisites:
     pip install requests

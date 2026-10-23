@@ -1,4 +1,4 @@
-// Send a Viber message using Abelo API with Bearer token authentication
+// Send a message (Viber or SMS) using Abelo API with Bearer token authentication
 // Requires Node.js 18+ (native fetch support)
 const API_KEY_ID = process.env.ABELO_KEY_ID || "YOUR_API_KEY_ID";
 const API_KEY_SECRET = process.env.ABELO_KEY_SECRET || "YOUR_API_KEY_SECRET";

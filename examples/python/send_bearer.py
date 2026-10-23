@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Send a Viber message using Abelo API with Bearer token authentication.
+Send a message (Viber or SMS) using Abelo API with Bearer token authentication.
 
 Prerequisites:
     pip install requests

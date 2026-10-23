@@ -105,7 +105,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"campaign_id\": \"{{campaignId}}\",\n  \"recipient\": {\n    \"type\": \"phone_number\",\n    \"value\": \"{{testPhoneNumber}}\"\n  },\n  \"params\": {\n    \"first_name\": \"Alex\",\n    \"order_number\": \"ORD-94812\",\n    \"tracking_code\": \"ORD-94812\",\n    \"cta_label\": \"Track Order\"\n  },\n  \"client_reference\": \"internal-order-94812\"\n}"
+              "raw": "{\n  \"campaign_id\": \"{{viberCampaignId}}\",\n  \"recipient\": {\n    \"type\": \"phone_number\",\n    \"value\": \"{{testPhoneNumber}}\"\n  },\n  \"params\": {\n    \"first_name\": \"Alex\",\n    \"order_number\": \"ORD-94812\",\n    \"tracking_code\": \"ORD-94812\",\n    \"cta_label\": \"Track Order\"\n  },\n  \"client_reference\": \"internal-order-94812\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/messages/send",
@@ -121,7 +121,7 @@
           }
         },
         {
-          "name": "Send Message (Email Lookup)",
+          "name": "Send SMS Message (Phone Number)",
           "request": {
             "method": "POST",
             "header": [
@@ -132,7 +132,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"campaign_id\": \"{{campaignId}}\",\n  \"recipient\": {\n    \"type\": \"email\",\n    \"value\": \"customer@example.com\"\n  },\n  \"params\": {\n    \"first_name\": \"Maria\",\n    \"discount_code\": \"WELCOME15\"\n  },\n  \"client_reference\": \"promo-welcome-15\"\n}"
+              "raw": "{\n  \"campaign_id\": \"{{smsCampaignId}}\",\n  \"recipient\": {\n    \"type\": \"phone_number\",\n    \"value\": \"{{testPhoneNumber}}\"\n  },\n  \"params\": {\n    \"first_name\": \"Alex\",\n    \"order_number\": \"ORD-94812\",\n    \"tracking_code\": \"TRK-94812\"\n  },\n  \"client_reference\": \"sms-order-94812\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/messages/send",
@@ -144,7 +144,34 @@
                 "send"
               ]
             },
-            "description": "Resolves recipient profile by email and dispatches the message to their verified channel."
+            "description": "Send an SMS message by phone number to an active SMS campaign endpoint."
+          }
+        },
+        {
+          "name": "Send Message (Email Lookup)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaign_id\": \"{{viberCampaignId}}\",\n  \"recipient\": {\n    \"type\": \"email\",\n    \"value\": \"customer@example.com\"\n  },\n  \"params\": {\n    \"first_name\": \"Maria\",\n    \"discount_code\": \"WELCOME15\"\n  },\n  \"client_reference\": \"promo-welcome-15\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messages/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messages",
+                "send"
+              ]
+            },
+            "description": "Resolves recipient profile by email and dispatches the message to their verified channel. Configured with {{viberCampaignId}} by default (can be swapped with {{smsCampaignId}})."
           }
         },
         {
@@ -159,7 +186,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"campaign_id\": \"{{campaignId}}\",\n  \"recipient\": {\n    \"type\": \"public_id\",\n    \"value\": \"{{testProfileId}}\"\n  },\n  \"params\": {\n    \"first_name\": \"Alex\",\n    \"order_number\": \"ORD-94812\",\n    \"tracking_code\": \"ORD-94812\",\n    \"cta_label\": \"Track Order\"\n  },\n  \"client_reference\": \"internal-order-94812\"\n}"
+              "raw": "{\n  \"campaign_id\": \"{{viberCampaignId}}\",\n  \"recipient\": {\n    \"type\": \"public_id\",\n    \"value\": \"{{testProfileId}}\"\n  },\n  \"params\": {\n    \"first_name\": \"Alex\",\n    \"order_number\": \"ORD-94812\",\n    \"tracking_code\": \"ORD-94812\",\n    \"cta_label\": \"Track Order\"\n  },\n  \"client_reference\": \"internal-order-94812\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/messages/send",
@@ -171,7 +198,7 @@
                 "send"
               ]
             },
-            "description": "Resolves recipient profile by public identifier and dispatches the message to their verified channel."
+            "description": "Resolves recipient profile by public identifier and dispatches the message to their verified channel. Configured with {{viberCampaignId}} by default (can be swapped with {{smsCampaignId}})."
           }
         },
         {
@@ -186,7 +213,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"campaign_id\": \"{{campaignId}}\",\n  \"recipient\": {\n    \"type\": \"phone_number\",\n    \"value\": \"{{testPhoneNumber}}\"\n  },\n  \"params\": {\n    \"otp_code\": \"849201\"\n  },\n  \"client_reference\": \"auth-req-5521\",\n  \"webhook_url\": \"https://api.yourdomain.com/v1/callbacks/viber-dlr\"\n}"
+              "raw": "{\n  \"campaign_id\": \"{{viberCampaignId}}\",\n  \"recipient\": {\n    \"type\": \"phone_number\",\n    \"value\": \"{{testPhoneNumber}}\"\n  },\n  \"params\": {\n    \"otp_code\": \"849201\"\n  },\n  \"client_reference\": \"auth-req-5521\",\n  \"webhook_url\": \"https://api.yourdomain.com/v1/callbacks/dlr\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/messages/send",
@@ -198,7 +225,7 @@
                 "send"
               ]
             },
-            "description": "Dispatches a message with a custom callback URL that receives HMAC-signed lifecycle delivery events."
+            "description": "Dispatches a message with a custom callback URL that receives HMAC-signed lifecycle delivery events. Configured with {{viberCampaignId}} by default (can be swapped with {{smsCampaignId}})."
           }
         }
       ]
@@ -312,7 +339,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"first_name\": \"Elena\",\n  \"viber_marketing_consent\": true\n}"
+              "raw": "{\n  \"first_name\": \"Elena\",\n  \"viber_marketing_consent\": true,\n  \"sms_marketing_consent\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/profiles/:public_id",

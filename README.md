@@ -7,7 +7,7 @@
 
 The official Postman collection, OpenAPI 3.1 specification, and quickstart guides for the **[Abelo](https://abelo.ai)** REST API.
 
-**Abelo** is an intelligent business messaging platform and an **Official Rakuten Viber Messaging Partner**. Businesses use Abelo to deliver transactional alerts (OTPs, order tracking, shipping notices), promotional campaigns, and eCommerce automations across **Viber**, **WhatsApp**, and **SMS** with automatic failover, profile synchronization, and 100% verified ROI tracking.
+**Abelo** is an intelligent business messaging platform and an **Official Rakuten Viber Messaging Partner**. Businesses use Abelo to deliver transactional alerts (OTPs, order tracking, shipping notices), promotional campaigns, and eCommerce automations across **Viber** and **SMS** (with **WhatsApp** support coming soon) with automatic failover, profile synchronization, and 100% verified ROI tracking.
 
 Explore our collection directly in the [Official Postman Public Workspace](https://www.postman.com/abelo-ai/abelo-public-api).
 
@@ -16,7 +16,8 @@ Explore our collection directly in the [Official Postman Public Workspace](https
 ## Key Features
 
 - **Direct Viber Business Messaging**: Built and delivered directly via official Rakuten Viber Business API infrastructure with a verified branded sender ID.
-- **Automatic SMS Failover**: If a recipient cannot receive a Viber or WhatsApp message, Abelo automatically falls back to SMS with zero configuration required.
+- **SMS Messaging**: Universal global reach across carrier networks supporting verified alphanumeric sender IDs, GSM-7 and Unicode (UCS-2) encodings, and automated link tracking.
+- **Automatic SMS Failover**: If a recipient cannot receive a Viber message, Abelo automatically falls back to SMS based on your campaign settings.
 - **Dual Authentication**:
   - **Basic Bearer Token** (`key_id:key_secret`) for frictionless developer onboarding.
   - **Enterprise HMAC-SHA256 Request Signing** for banking, fintech, and mission-critical OTPs.
@@ -48,7 +49,8 @@ In your Postman Environment, fill in your credentials obtained from the [Abelo M
 - `apiKeyId`: Your API Key ID (`key_live_...`)
 - `apiKeySecret`: Your API Key Secret (for `bearer` mode)
 - `hmacSecret`: Your HMAC Secret (only needed if `authMethod` is set to `hmac`)
-- `campaignId`: Your Target API Campaign ID
+- `viberCampaignId`: Target Viber API Campaign ID
+- `smsCampaignId`: Target SMS API Campaign ID
 - `testPhoneNumber`: E.164 phone number (e.g. `+306912345678`)
 - `testProfileId`: Sample profile public ID (e.g. `prf_live_sample123`)
 - `testWebhookId`: Sample webhook configuration ID (e.g. `whk_sample123`)
@@ -109,7 +111,7 @@ See [`examples/curl/send_viber_hmac.sh`](./examples/curl/send_viber_hmac.sh), [`
 ### Messages
 | Method | Endpoint | Status | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/v1/messages/send` | `200 OK` | Trigger an API message. Recipient lookup supports `phone_number`, `email`, or `public_id`. |
+| `POST` | `/v1/messages/send` | `200 OK` | Trigger an API message across Viber or SMS. Recipient lookup supports `phone_number`, `email`, or `public_id`. |
 
 ### Profiles
 | Method | Endpoint | Status | Description |
@@ -147,7 +149,7 @@ See [`examples/curl/send_viber_hmac.sh`](./examples/curl/send_viber_hmac.sh), [`
 ## Code Examples
 
 Check the [`examples/`](./examples/) folder for complete scripts:
-- **cURL**: [`examples/curl/`](./examples/curl/)
+- **cURL**: [`examples/curl/`](./examples/curl/) (includes Viber and SMS dispatches using Bearer and HMAC authentication)
 - **Python**: [`examples/python/`](./examples/python/)
 - **Node.js**: [`examples/node/`](./examples/node/)
 
